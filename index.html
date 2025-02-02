@@ -1,33 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta charset for proper text encoding -->
     <meta charset="UTF-8">
+    <!-- Meta tag for viewport to make the page responsive -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title of the page displayed in the browser tab -->
     <title>Color Palette Manager</title>
+    <!-- Link to external stylesheet for styling the page -->
     <link rel="stylesheet" href="style.css">
-    
 </head>
 <body>
+    <!-- Main header of the page -->
     <h1 style="text-align: center;">Color Palette Manager</h1>
     <div class="container">
+        <!-- Left panel for user input (color selectors and buttons) -->
         <div class="left-panel">
+            <!-- Color input for the first color in the palette -->
             <input type="color" id="color-input-1">
+            <!-- Color input for the second color in the palette -->
             <input type="color" id="color-input-2">
+            <!-- Color input for the third color in the palette -->
             <input type="color" id="color-input-3">
+            <!-- Text input for naming the palette -->
             <input type="text" id="palette-name" placeholder="Palette Name">
+            <!-- Button to save the palette -->
             <button id="save-palette">Save Palette</button>
+            <!-- Button to add palette to favorites -->
             <button id="add-favorite">Add to Favorites</button>
         </div>
+
+        <!-- Right panel for displaying saved and favorite palettes -->
         <div class="right-panel">
+            <!-- Heading for saved palettes section -->
             <h3 class="save">Saved Palettes</h3>
+            <!-- Container to display the saved palettes -->
             <div id="saved-palettes-list"></div>
+            <!-- Heading for favorite palettes section -->
             <h3 class="fav">Favorite Palettes</h3>
+            <!-- Container to display the favorite palettes -->
             <div id="favorites-list"></div>
         </div>
     </div>
+
+    <!-- Link to the external JavaScript file to add functionality -->
     <script src="script.js"></script>
-        
-   
-    
 </body>
 </html>
