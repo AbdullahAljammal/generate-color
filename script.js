@@ -1,77 +1,76 @@
-// Select elements
-const paletteNameInput = document.getElementById('palette-name');
-const color1Input = document.getElementById('color1');
-const color2Input = document.getElementById('color2');
-const color3Input = document.getElementById('color3');
-const saveButton = document.getElementById('save-palette');
-const generateButton = document.getElementById('generate-random');
-const paletteList = document.getElementById('palette-list');
 
-// Get palettes from local storage
-function getPalettes() {
-  return JSON.parse(localStorage.getItem('palettes')) || [];
+// Load the palettes from localStorage
+function loadPalettes(key) {
+    return JSON.parse(localStorage.getItem(key)) || [];
 }
 
-// Save palettes to local storage
-function savePalettes(palettes) {
-  localStorage.setItem('palettes', JSON.stringify(palettes));
+// Save the palettes to localStorage
+function savePalettes(palettes, key) {
+    localStorage.setItem(key, JSON.stringify(palettes));
 }
 
-// Save a new palette
-function savePalette() {
-  const name = paletteNameInput.value;
-  const color1 = color1Input.value;
-  const color2 = color2Input.value;
-  const color3 = color3Input.value;
-
-  if (!name) {
-    alert('Please provide a palette name.');
-    return;
-  }
-
-  const palettes = getPalettes();
-  palettes.push({ name, colors: [color1, color2, color3] });
-  savePalettes(palettes);
-  renderPalettes();
+// Render the palettes on the screen
+function renderPalettes(palettes, listId, storageKey) {
+    const palettesList = document.getElementById(listId);
+    palettesList.innerHTML = palettes.map((palette, index) => `
+        <div style="margin-bottom: 10px;">
+            <strong>${palette.name}</strong>
+            <div class="color-box">
+                <div class="color-swatch" style="background-color: ${palette.colors[0]}"></div>
+                <div class="color-swatch" style="background-color: ${palette.colors[1]}"></div>
+                <div class="color-swatch" style="background-color: ${palette.colors[2]}"></div>
+            </div>
+            <button class="remove-btn" data-index="${index}" data-storage="${storageKey}">Remove</button>
+        </div>
+    `).join('');
 }
 
-// Generate random colors
-function generateRandomPalette() {
-  color1Input.value = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-  color2Input.value = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-  color3Input.value = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
+// Save the palette to the appropriate list (Saved or Favorites)
+function savePalette(storageKey, listId) {
+    const palette = {
+        name: document.getElementById('palette-name').value,
+        colors: [
+            document.getElementById('color-input-1').value,
+            document.getElementById('color-input-2').value,
+            document.getElementById('color-input-3').value
+        ]
+    };
+
+    if (palette.name.trim() === "") {
+        alert("Please enter a palette name.");
+        return;
+    }
+
+    let palettes = loadPalettes(storageKey);
+
+    // Avoid adding duplicate palettes
+    if (!palettes.some(existingPalette => existingPalette.name === palette.name)) {
+        palettes.push(palette);
+        savePalettes(palettes, storageKey);
+        renderPalettes(palettes, listId, storageKey);
+    }
 }
 
-// Delete a palette
-function deletePalette(index) {
-  const palettes = getPalettes();
-  palettes.splice(index, 1);
-  savePalettes(palettes);
-  renderPalettes();
-}
+// Event listeners for saving palettes
+document.getElementById('save-palette').addEventListener('click', () => savePalette('savedPalettes', 'saved-palettes-list'));
+document.getElementById('add-favorite').addEventListener('click', () => savePalette('favoritePalettes', 'favorites-list'));
 
-// Render all palettes
-function renderPalettes() {
-  const palettes = getPalettes();
-  paletteList.innerHTML = ''; // Clear the list
+// Render saved and favorite palettes on page load
+document.addEventListener('DOMContentLoaded', () => {
+    renderPalettes(loadPalettes('savedPalettes'), 'saved-palettes-list', 'savedPalettes');
+    renderPalettes(loadPalettes('favoritePalettes'), 'favorites-list', 'favoritePalettes');
+});
 
-  palettes.forEach((palette, index) => {
-    const paletteDiv = document.createElement('div');
-    paletteDiv.className = 'palette-card';
-    paletteDiv.innerHTML = `
-      <h3>${palette.name}</h3>
-      <div class="color-preview">
-        <div class="color-box" style="background-color: ${palette.colors[0]}"></div>
-        <div class="color-box" style="background-color: ${palette.colors[1]}"></div>
-        <div class="color-box" style="background-color: ${palette.colors[2]}"></div>
-      </div>
-      <button onclick="deletePalette(${index})">Delete</button>
-    `;
-    paletteList.appendChild(paletteDiv);
-  });
-}
-
-// Event listeners
-saveButton.addEventListener('click', savePalette);
-generateButton.addEventListener('click', generateRandomPalette);
-document.addEventListener('DOMContentLoaded', renderPalettes);
+// Handle the "Remove" button click to remove a palette
+document.addEventListener('click', (event) => {
+    if (event.target && event.target.classList.contains('remove-btn')) {
+        const index = event.target.getAttribute('data-index');
+        const storageKey = event.target.getAttribute('data-storage');
+        
+        let palettes = loadPalettes(storageKey);
+        palettes.splice(index, 1); // Remove the selected palette
+        
+        savePalettes(palettes, storageKey);
+        renderPalettes(palettes, storageKey === 'savedPalettes' ? 'saved-palettes-list' : 'favorites-list', storageKey);
+    }
+});
